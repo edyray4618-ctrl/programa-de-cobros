@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from datetime import datetime
 from kivy.lang import Builder
@@ -53,37 +54,52 @@ class CarteraApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Blue"
         self.theme_cls.accent_palette = "Red"
+        # Obtener ruta de almacenamiento segura según el S.O.
+        self.db_path = os.path.join(self.user_data_dir, "cartera_movil.db")
         self.init_db()
         return Builder.load_string(KV)
 
     def on_start(self):
         self.cargar_clientes('Todos')
 
+    def get_db_connection(self):
+        return sqlite3.connect(self.db_path)
+
     def init_db(self):
-        conn = sqlite3.connect("cartera_movil.db")
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS clientes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cod_promotor INTEGER,
-                prestamo TEXT,
-                nombre TEXT,
-                fec_cuota TEXT,
-                total_cuota REAL,
-                num_cuota INTEGER,
-                estado_cuota TEXT,
-                UNIQUE(prestamo, num_cuota)
-            )
-        """)
-        conn.commit()
-        conn.close()
+        try:
+            conn = self.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS clientes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cod_promotor INTEGER,
+                    prestamo TEXT,
+                    nombre TEXT,
+                    fec_cuota TEXT,
+                    total_cuota REAL,
+                    num_cuota INTEGER,
+                    estado_cuota TEXT,
+                    UNIQUE(prestamo, num_cuota)
+                )
+            """)
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error iniciando DB: {e}")
 
     def cargar_clientes(self, filtro='Todos'):
-        conn = sqlite3.connect("cartera_movil.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, prestamo, nombre, fec_cuota, total_cuota, num_cuota, estado_cuota FROM clientes")
-        rows = cursor.fetchall()
-        conn.close()
+        if not hasattr(self, 'root') or not self.root:
+            return
+
+        try:
+            conn = self.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, prestamo, nombre, fec_cuota, total_cuota, num_cuota, estado_cuota FROM clientes")
+            rows = cursor.fetchall()
+            conn.close()
+        except Exception as e:
+            print(f"Error al leer DB: {e}")
+            rows = []
 
         if filtro == 'Atrasados':
             container = self.root.ids.lista_atrasados
@@ -136,72 +152,80 @@ class CarteraApp(MDApp):
 
     def toggle_pago(self, cliente_id, estado_actual, filtro_actual):
         nuevo_estado = 'A' if estado_actual == 'P' else 'P'
-        conn = sqlite3.connect("cartera_movil.db")
-        cursor = conn.cursor()
-        cursor.execute("UPDATE clientes SET estado_cuota = ? WHERE id = ?", (nuevo_estado, cliente_id))
-        conn.commit()
-        conn.close()
+        try:
+            conn = self.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("UPDATE clientes SET estado_cuota = ? WHERE id = ?", (nuevo_estado, cliente_id))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error al actualizar estado: {e}")
         self.cargar_clientes(filtro_actual)
 
     def seleccionar_excel(self):
-        filechooser.open_file(on_selection=self.importar_excel)
+        try:
+            filechooser.open_file(on_selection=self.importar_excel)
+        except Exception as e:
+            print(f"Error seleccionando archivo: {e}")
 
     def importar_excel(self, selection):
         if selection:
             path = selection[0]
-            wb = openpyxl.load_workbook(path)
-            sheet = wb.active
+            try:
+                wb = openpyxl.load_workbook(path)
+                sheet = wb.active
 
-            conn = sqlite3.connect("cartera_movil.db")
-            cursor = conn.cursor()
+                conn = self.get_db_connection()
+                cursor = conn.cursor()
 
-            # Leer encabezados para mapear columnas
-            headers = [cell.value for cell in sheet[1]]
-            
-            idx_promotor = headers.index('COD PROMOTOR') if 'COD PROMOTOR' in headers else 1
-            idx_prestamo = headers.index('PRESTAMO') if 'PRESTAMO' in headers else 2
-            idx_nombre = headers.index('NOMBRE DEL CLIENTE') if 'NOMBRE DEL CLIENTE' in headers else 3
-            idx_fec = headers.index('FEC CUOTA') if 'FEC CUOTA' in headers else 4
-            idx_total = headers.index('TOTAL CUOTA') if 'TOTAL CUOTA' in headers else 7
-            idx_num = headers.index('NUM CUOTA') if 'NUM CUOTA' in headers else 8
-            idx_estado = headers.index('ESTADO CUOTA') if 'ESTADO CUOTA' in headers else 12
-
-            for row in sheet.iter_rows(min_row=2, values_only=True):
-                if not row[idx_prestamo]:
-                    continue
-
-                cod_prom = int(row[idx_promotor]) if row[idx_promotor] else 0
-                prestamo = str(row[idx_prestamo])
-                nombre = str(row[idx_nombre])
+                headers = [cell.value for cell in sheet[1]]
                 
-                fec_val = row[idx_fec]
-                if isinstance(fec_val, datetime):
-                    fec_str = fec_val.strftime('%Y-%m-%d')
-                else:
-                    fec_str = str(fec_val)[:10] if fec_val else ''
+                idx_promotor = headers.index('COD PROMOTOR') if 'COD PROMOTOR' in headers else 1
+                idx_prestamo = headers.index('PRESTAMO') if 'PRESTAMO' in headers else 2
+                idx_nombre = headers.index('NOMBRE DEL CLIENTE') if 'NOMBRE DEL CLIENTE' in headers else 3
+                idx_fec = headers.index('FEC CUOTA') if 'FEC CUOTA' in headers else 4
+                idx_total = headers.index('TOTAL CUOTA') if 'TOTAL CUOTA' in headers else 7
+                idx_num = headers.index('NUM CUOTA') if 'NUM CUOTA' in headers else 8
+                idx_estado = headers.index('ESTADO CUOTA') if 'ESTADO CUOTA' in headers else 12
 
-                total_cuota = float(row[idx_total]) if row[idx_total] else 0.0
-                num_cuota = int(row[idx_num]) if row[idx_num] else 1
-                estado_excel = str(row[idx_estado]) if row[idx_estado] else 'A'
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+                    if not row[idx_prestamo]:
+                        continue
 
-                cursor.execute("SELECT estado_cuota FROM clientes WHERE prestamo = ? AND num_cuota = ?", (prestamo, num_cuota))
-                reg = cursor.fetchone()
+                    cod_prom = int(row[idx_promotor]) if row[idx_promotor] else 0
+                    prestamo = str(row[idx_prestamo])
+                    nombre = str(row[idx_nombre])
+                    
+                    fec_val = row[idx_fec]
+                    if isinstance(fec_val, datetime):
+                        fec_str = fec_val.strftime('%Y-%m-%d')
+                    else:
+                        fec_str = str(fec_val)[:10] if fec_val else ''
 
-                if reg:
-                    est_final = reg[0] if reg[0] == 'P' else estado_excel
-                    cursor.execute("""
-                        UPDATE clientes SET cod_promotor=?, nombre=?, fec_cuota=?, total_cuota=?, estado_cuota=?
-                        WHERE prestamo=? AND num_cuota=?
-                    """, (cod_prom, nombre, fec_str, total_cuota, est_final, prestamo, num_cuota))
-                else:
-                    cursor.execute("""
-                        INSERT INTO clientes (cod_promotor, prestamo, nombre, fec_cuota, total_cuota, num_cuota, estado_cuota)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (cod_prom, prestamo, nombre, fec_str, total_cuota, num_cuota, estado_excel))
+                    total_cuota = float(row[idx_total]) if row[idx_total] else 0.0
+                    num_cuota = int(row[idx_num]) if row[idx_num] else 1
+                    estado_excel = str(row[idx_estado]) if row[idx_estado] else 'A'
 
-            conn.commit()
-            conn.close()
-            self.cargar_clientes('Todos')
+                    cursor.execute("SELECT estado_cuota FROM clientes WHERE prestamo = ? AND num_cuota = ?", (prestamo, num_cuota))
+                    reg = cursor.fetchone()
+
+                    if reg:
+                        est_final = reg[0] if reg[0] == 'P' else estado_excel
+                        cursor.execute("""
+                            UPDATE clientes SET cod_promotor=?, nombre=?, fec_cuota=?, total_cuota=?, estado_cuota=?
+                            WHERE prestamo=? AND num_cuota=?
+                        """, (cod_prom, nombre, fec_str, total_cuota, est_final, prestamo, num_cuota))
+                    else:
+                        cursor.execute("""
+                            INSERT INTO clientes (cod_promotor, prestamo, nombre, fec_cuota, total_cuota, num_cuota, estado_cuota)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """, (cod_prom, prestamo, nombre, fec_str, total_cuota, num_cuota, estado_excel))
+
+                conn.commit()
+                conn.close()
+                self.cargar_clientes('Todos')
+            except Exception as e:
+                print(f"Error procesando Excel: {e}")
 
 if __name__ == '__main__':
     CarteraApp().run()
