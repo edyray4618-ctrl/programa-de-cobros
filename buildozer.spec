@@ -7,16 +7,16 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-# Se agregan pillow y requests/urllib3 para compatibilidad interna de KivyMD
-requirements = python3,kivy,kivymd,plyer,openpyxl,sqlite3,pillow,requests
+requirements = python3,kivy,kivymd,plyer,openpyxl,sqlite3,pillow
 
 p4a.branch = master
 
 orientation = portrait
-android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,MANAGE_EXTERNAL_STORAGE
 
-android.api = 31
-android.minapi = 21
+# Configuración actualizada para soporte de Android 14 y 15:
+android.api = 34
+android.minapi = 24
 android.ndk = 25b
 android.accept_sdk_license = True
 android.archs = arm64-v8a
