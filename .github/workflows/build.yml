@@ -13,8 +13,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Build with Buildozer Action
-      uses: ArtemShedov/buildozer-action@v1.2.0
+    - name: Build with Buildozer
+      uses: SFyro/action-buildozer@v1.3
       with:
         command: buildozer android debug
         buildozer_version: master
