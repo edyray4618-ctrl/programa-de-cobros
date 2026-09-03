@@ -7,7 +7,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-requirements = python3,kivy,kivymd,plyer,openpyxl,sqlite3,pillow
+requirements = python3,kivy,kivymd,materialyoucolor,plyer,openpyxl,sqlite3,pillow
 
 p4a.branch = master
 
