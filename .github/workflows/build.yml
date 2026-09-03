@@ -32,22 +32,20 @@ jobs:
         pip install --upgrade pip setuptools
         pip install "cython<3.0.0" buildozer==1.5.0
 
-    - name: Build APK with Log File
+    - name: Accept Android Licenses & Build APK
       run: |
         mkdir -p ~/.android
         touch ~/.android/repositories.cfg
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        buildozer --warn_on_root=0 android debug 2>&1 | tee buildozer_output.log
+        buildozer --warn_on_root=0 android debug
 
-    - name: Upload Build Log on Failure
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: Buildozer-Error-Log
-        path: buildozer_output.log
+    - name: Prepare APK Artifact Path
+      run: |
+        mkdir -p bin
+        find .buildozer -name "*.apk" -exec cp {} bin/ \; || true
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: App-Android-APK
-        path: '**/*.apk'
+        path: bin/*.apk
