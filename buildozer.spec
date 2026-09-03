@@ -7,8 +7,8 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-# Se agregaron kivymd, plyer, openpyxl y sqlite3 que usa tu main.py
-requirements = python3,kivy==2.3.0,kivymd,plyer,openpyxl,sqlite3
+# Librerías exactas que utiliza tu main.py
+requirements = python3,kivy,kivymd,plyer,openpyxl,sqlite3
 
 p4a.branch = master
 
