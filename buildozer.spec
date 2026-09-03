@@ -7,14 +7,14 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-requirements = python3,kivy
+# Se agregaron kivymd, plyer, openpyxl y sqlite3 que usa tu main.py
+requirements = python3,kivy==2.3.0,kivymd,plyer,openpyxl,sqlite3
 
-p4a.branch = v2024.01.21
+p4a.branch = master
 
 orientation = portrait
-android.permissions = INTERNET
+android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
 
-# Modificado a 31 para compatibilidad perfecta con Gradle
 android.api = 31
 android.minapi = 21
 android.ndk = 25b
