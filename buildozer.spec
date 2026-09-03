@@ -7,14 +7,14 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-requirements = python3,kivy,kivymd,materialyoucolor,plyer,openpyxl,sqlite3,pillow
+# Usamos la versión estable de KivyMD sin la dependencia problematica de materialyoucolor
+requirements = python3,kivy==2.2.1,https://github.com/kivymd/KivyMD/archive/1.2.0.zip,plyer,openpyxl,sqlite3,pillow
 
 p4a.branch = master
 
 orientation = portrait
 android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,MANAGE_EXTERNAL_STORAGE
 
-# Configuración actualizada para soporte de Android 14 y 15:
 android.api = 34
 android.minapi = 24
 android.ndk = 25b
