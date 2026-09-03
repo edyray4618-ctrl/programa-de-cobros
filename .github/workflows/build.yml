@@ -34,10 +34,18 @@ jobs:
 
     - name: Accept Android Licenses & Build APK
       run: |
+        # Eliminar NDK 27 del entorno para forzar NDK 25b compatible
+        unset ANDROID_NDK_ROOT
+        unset ANDROID_NDK_HOME
+        
         mkdir -p ~/.android
         touch ~/.android/repositories.cfg
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        
         buildozer --warn_on_root=0 android debug
+      env:
+        ANDROID_NDK_ROOT: ""
+        ANDROID_NDK_HOME: ""
 
     - name: Prepare APK Artifact Path
       run: |
