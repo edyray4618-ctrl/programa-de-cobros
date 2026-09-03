@@ -7,10 +7,9 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-# Requirements estables
 requirements = python3,kivy
 
-# Definir la rama estable de python-for-android para evitar Python 3.14
+# Mantiene Python 3.11 estable en Android
 p4a.branch = v2024.01.21
 
 orientation = portrait
