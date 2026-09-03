@@ -32,20 +32,24 @@ jobs:
         pip install --upgrade pip setuptools
         pip install "cython<3.0.0" buildozer==1.5.0
 
-    - name: Accept Android Licenses & Build APK
+    - name: Accept Android Licenses
       run: |
-        # Eliminar NDK 27 del entorno para forzar NDK 25b compatible
-        unset ANDROID_NDK_ROOT
-        unset ANDROID_NDK_HOME
-        
         mkdir -p ~/.android
         touch ~/.android/repositories.cfg
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        
-        buildozer --warn_on_root=0 android debug
-      env:
-        ANDROID_NDK_ROOT: ""
-        ANDROID_NDK_HOME: ""
+
+    - name: Build APK & Capture Logs
+      run: |
+        unset ANDROID_NDK_ROOT
+        unset ANDROID_NDK_HOME
+        buildozer --warn_on_root=0 android debug > buildozer.log 2>&1 || true
+
+    - name: Show Critical Errors Only
+      run: |
+        echo "=== LINEAS CON ERRORES CRITICOS ==="
+        grep -iE "error|exception|failed|fatal" buildozer.log | tail -n 40 || true
+        echo "=== ULTIMAS 50 LINEAS DEL LOG ==="
+        tail -n 50 buildozer.log || true
 
     - name: Prepare APK Artifact Path
       run: |
