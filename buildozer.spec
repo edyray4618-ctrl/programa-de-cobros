@@ -7,8 +7,8 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-# Librerías exactas que utiliza tu main.py
-requirements = python3,kivy,kivymd,plyer,openpyxl,sqlite3
+# Se agregan pillow y requests/urllib3 para compatibilidad interna de KivyMD
+requirements = python3,kivy,kivymd,plyer,openpyxl,sqlite3,pillow,requests
 
 p4a.branch = master
 
