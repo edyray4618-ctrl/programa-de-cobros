@@ -1,6 +1,9 @@
 import os
 import sqlite3
 from datetime import datetime
+
+# Evita cierres de renderizado en Android
+from kivy.core.window import Window
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.uix.list import TwoLineAvatarIconListItem, IconRightWidget
