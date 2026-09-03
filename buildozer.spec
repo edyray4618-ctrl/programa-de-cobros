@@ -13,7 +13,9 @@ p4a.branch = v2024.01.21
 
 orientation = portrait
 android.permissions = INTERNET
-android.api = 33
+
+# Modificado a 31 para compatibilidad perfecta con Gradle
+android.api = 31
 android.minapi = 21
 android.ndk = 25b
 android.accept_sdk_license = True
