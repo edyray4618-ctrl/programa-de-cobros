@@ -7,8 +7,8 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
-# Usamos la versión estable de KivyMD sin la dependencia problematica de materialyoucolor
-requirements = python3,kivy==2.2.1,https://github.com/kivymd/KivyMD/archive/1.2.0.zip,plyer,openpyxl,sqlite3,pillow
+# KivyMD 1.2.0 estable declarada correctamente sin URLs directas
+requirements = python3,kivy==2.2.1,kivymd==1.2.0,plyer,openpyxl,sqlite3,pillow
 
 p4a.branch = master
 
